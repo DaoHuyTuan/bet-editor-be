@@ -9,15 +9,11 @@ const Post = db.define('post', {
     allowNull: false,
     primaryKey: true
   },
-  pair_id: Sequelize.STRING,
-  symbol: Sequelize.STRING,
-  pair_value: Sequelize.STRING,
-  pair_name: Sequelize.STRING,
-  twitter: Sequelize.STRING,
-  website: Sequelize.STRING,
-  logo: Sequelize.STRING,
-  github: Sequelize.STRING,
-  description: Sequelize.TEXT
+  title: Sequelize.STRING,
+  contents: Sequelize.TEXT,
+  isPublish: Sequelize.BOOLEAN,
+  tags: Sequelize.STRING,
+  author: Sequelize.STRING
 })
 
 module.exports = Post
