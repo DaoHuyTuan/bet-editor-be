@@ -1,12 +1,12 @@
-const Sequelize1 = require('sequelize')
-const sequelize = new Sequelize1(
-  process.env.PG_DB,
-  process.env.PG_USER,
-  process.env.PG_PASSWORD,
-  {
-    host: process.env.PG_HOST,
-    dialect: 'postgres'
-  }
-)
+import { Post } from '../models/post/Post'
+import { Sequelize } from 'sequelize-typescript'
 
-module.exports = sequelize
+export const sequelize = new Sequelize({
+  host: process.env.PG_HOST,
+  dialect: 'postgres',
+  models: [Post],
+  database: process.env.PG_DB,
+  username: process.env.PG_USER,
+  password: process.env.PG_PASSWORD,
+  storage: ':memory:'
+})
