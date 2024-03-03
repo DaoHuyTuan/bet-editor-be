@@ -1,8 +1,8 @@
-const Posts = require('../models/post')
+import { Post } from '../models/post/Post'
 const get_posts = (req: any, res: any, next: any) => {
-  Posts.findAll()
-    .then((posts: any) => {
-      res.status(200).json({ posts: posts })
+  Post.findAll()
+    .then((posts: Post[]) => {
+      res.status(200).json({ posts })
     })
     .catch((err: any) => console.log(err))
 }
