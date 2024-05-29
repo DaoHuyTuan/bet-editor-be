@@ -12,7 +12,7 @@ const get_posts = (req: Request<{}, {}, Post>, res: any, next: any) => {
       if (posts.length > 0) {
         res.status(200).json({ message: 'Post found!', posts })
       } else {
-        res.status(200).json({ message: 'Post not found!' })
+        res.status(200).json({ message: 'Post not found!', posts })
       }
     })
     .catch((err: any) => console.log(err))
