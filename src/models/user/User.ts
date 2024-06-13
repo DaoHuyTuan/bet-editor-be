@@ -5,5 +5,7 @@ class User extends Model {
   @PrimaryKey @Column address: string
   @Column name: string
   @Column role: string
+  @Column nonce: string
+  @Column message: string
 }
 export { User }

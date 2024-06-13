@@ -3,11 +3,11 @@ import { Request, Response } from 'express'
 import { User } from '../models/user/User'
 const get_users = (req: Request<{}, {}, User>, res: any, next: any) => {
   User.findAll({})
-    .then((posts: User[]) => {
-      if (posts.length > 0) {
-        res.status(200).json({ message: 'Post found!', posts })
+    .then((users: User[]) => {
+      if (users.length > 0) {
+        res.status(200).json({ message: 'User found!', users })
       } else {
-        res.status(200).json({ message: 'Post not found!', posts })
+        res.status(200).json({ message: 'User not found!', users })
       }
     })
     .catch((err: any) => console.log(err))

@@ -1,18 +1,24 @@
 import { Request, Response } from 'express'
 
 import { Post } from '../models/post/Post'
-const get_posts = (req: Request<{}, {}, Post>, res: any, next: any) => {
-  const { path } = req.body
-  Post.findAll({
-    where: {
-      path
-    }
+const get_posts = (
+  req: Request<{}, {}, { limit: number; page: number } & Post>,
+  res: any,
+  next: any
+) => {
+  const { page, limit, ...rest } = req.body
+  Post.findAndCountAll({
+    where: rest,
+    offset: (page - 1) * limit,
+    limit
   })
-    .then((posts: Post[]) => {
-      if (posts.length > 0) {
-        res.status(200).json({ message: 'Post found!', posts })
+    .then(({ rows, count }: { rows: Post[]; count: number }) => {
+      if (rows.length > 0) {
+        res
+          .status(200)
+          .json({ message: 'Post found!', rows, page, limit, total: count })
       } else {
-        res.status(200).json({ message: 'Post not found!', posts })
+        res.status(200).json({ message: 'Post not found!', rows })
       }
     })
     .catch((err: any) => console.log(err))
@@ -20,13 +26,14 @@ const get_posts = (req: Request<{}, {}, Post>, res: any, next: any) => {
 
 const create_post = async (
   req: Request<{}, {}, Post>,
-  res: Response,
+  res: Response<{}, {}>,
   next: any
 ) => {
   try {
     const { path } = req.body
     const [post, created] = await Post.findOrCreate({
-      where: { path }
+      where: { path },
+      defaults: { ...req.body, address: req.body.owner.toLowerCase() }
     })
     console.log('post', post)
     console.log('created', created)

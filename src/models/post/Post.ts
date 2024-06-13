@@ -32,6 +32,7 @@ class Post extends Model {
   @Default({ title: 'untitle', url: 'hello test' })
   @Column({ type: DataTypes.JSONB, defaultValue: {} })
   metadata: PostMetadata
+  @Column owner: string
   @BeforeCreate static async beforeCreateHook(instance: Post) {
     instance.create_at = Math.floor(new Date().getTime() / 1000)
     return instance
