@@ -4,6 +4,7 @@ import { json } from 'body-parser'
 
 import { postRouter } from './models/post/post-router'
 import { userRouter } from './models/user/user-router'
+import { authRouter } from './models/auth/auth-router'
 
 export const app = express()
 
@@ -12,6 +13,8 @@ app.use(json())
 app.use(postRouter())
 
 app.use(userRouter())
+
+app.use(authRouter())
 
 app.use(
   strongErrorHandler({
