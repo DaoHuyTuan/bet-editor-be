@@ -6,6 +6,7 @@ class User extends Model {
   @Column name: string
   @Default('normal') @Column role: string
   @Default(0) @Column nonce: number
-  @Column message: string
+  @Column signature: string
+  @Column salt: string
 }
 export { User }

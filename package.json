@@ -20,13 +20,15 @@
     "serve": "ts-node dist/index.js"
   },
   "dependencies": {
+    "@wagmi/connectors": "^5.1.7",
+    "@wagmi/core": "^2.13.4",
     "body-parser": "^1.20.2",
-    "ethers": "^6.13.1",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.2.1",
     "sequelize": "^6.37.0",
     "sequelize-typescript": "^2.1.6",
-    "strong-error-handler": "^5.0.7"
+    "strong-error-handler": "^5.0.7",
+    "viem": "2.x"
   }
 }

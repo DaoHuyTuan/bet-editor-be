@@ -22,10 +22,10 @@ services:
     container_name: node_db
     image: postgres:12
     ports:
-      - '5432:5432'
+      - '6789:5432'
     environment:
       - POSTGRES_DB=node_pg_db
-      - POSTGRES_USER=zyye
+      - POSTGRES_USER=root
       - POSTGRES_PASSWORD=123123
     volumes:
       - node_db_data:/var/lib/postgresql/data
