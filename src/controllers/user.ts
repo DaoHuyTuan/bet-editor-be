@@ -20,7 +20,10 @@ const create_user = async (
 ) => {
   try {
     console.log('body', req.body)
-    const result = await User.create({ ...req.body })
+    const result = await User.create({
+      ...req.body,
+      address: req.body.address.toLowerCase()
+    })
     console.log('result', result)
     if (result) {
       return res.status(201).json({ message: 'User created', user: result })

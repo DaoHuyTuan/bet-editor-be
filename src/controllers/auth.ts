@@ -3,16 +3,67 @@ import { Address, keccak256, toHex } from 'viem'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { decryptAddress, encryptAddress } from '../utils/secure'
 import { generateSiweNonce } from 'viem/siwe'
+import { User } from '../models/user/User'
 // import { User } from '../models/user/User'
 // import { Address, hashMessage, verifyHash } from 'viem'
 // import { signMessage, toAccount } from 'viem/accounts'
 
+const get_nonce = async (req: Request, res: Response) => {
+  try {
+    const { address } = req.body
+    const user = await User.findByPk(address)
+    if (user) {
+      return res.status(200).send({ message: 'success', nonce: user.nonce })
+    } else {
+      return res
+        .status(404)
+        .send({ message: 'User not found', error_code: 'USER_NOT_FOUND' })
+    }
+  } catch (error) {
+    res.status(400).send({ message: 'Ops, something is wrong', error })
+  }
+}
+
 const get_sign_message = async (
-  req: Request<{}, {}, { address: Address }>,
+  req: Request<{}, {}, { address: Address; signature: string }>,
   res: Response
 ) => {
   try {
     // const randomByte = generateSiweNonce()
+    const { address } = req.body
+    let salt = ''
+    const user = await User.findByPk(address)
+
+    if (user) {
+      salt = user.salt
+    } else {
+      salt = generateSiweNonce()
+      const encryptedAddrees = await encryptAddress(req.body.address, salt)
+      const payloadJWT = {
+        s: salt, // salt
+        a: encryptedAddrees // address
+      }
+      const privateString = keccak256(
+        toHex(
+          `0x${salt}-${req.body.address.toLowerCase()}-${req.body.signature}`
+        )
+      )
+
+      const token = jwt.sign(payloadJWT, privateString, {
+        expiresIn: '1h'
+      })
+      const newUser = await User.create({
+        address,
+        salt,
+        signature: privateString
+      })
+      if (newUser) {
+        return res.status(200).send({
+          message: 'success',
+          t: token // token
+        })
+      }
+    }
 
     // jwt.decode()
     // const hashedAddress = keccak256(req.body.address.toLowerCase() as Address)
@@ -36,32 +87,31 @@ const get_sign_message = async (
     //   expiresIn: '1h'
     // })
     // console.log('result', result)
-    const salt = generateSiweNonce()
-    const encryptedAddrees = await encryptAddress(req.body.address, salt)
+
     // const hex = toHex(`${salt} ${req.body.address.toLowerCase()}`)
     // @ts-ignore
     // const result = await decryptAddress(data, salt)
-    const payloadJWT = {
-      s: salt,
-      a: encryptedAddrees
-      // h: hex
-    }
-    const privateString = keccak256(
-      toHex(`0x${salt}-${req.body.address.toLowerCase()}`)
-    )
+    // const payloadJWT = {
+    //   s: salt, // salt
+    //   a: encryptedAddrees // address
+    //   // h: hex
+    // }
+    // const privateString = keccak256(
+    //   toHex(`0x${salt}-${req.body.address.toLowerCase()}-${req.body.signature}`)
+    // )
 
-    const token = jwt.sign(payloadJWT, privateString, {
-      expiresIn: '1h'
-    })
+    // const token = jwt.sign(payloadJWT, privateString, {
+    //   expiresIn: '1h'
+    // })
 
-    return res.status(200).send({
-      message: 'success',
-      // a: encryptedAddrees, // address
-      // s: salt, // salt
-      t: token, // token
-      h: privateString // hex
-      // privateString
-    })
+    // return res.status(200).send({
+    //   message: 'success',
+    //   // a: encryptedAddrees, // address
+    //   // s: salt, // salt
+    //   t: token // token
+    //   // h: privateString // hex
+    //   // privateString
+    // })
     // const { address } = req.body
 
     // const user = await User.findByPk(address)
@@ -135,4 +185,4 @@ const login = async (req: Request<{}, {}, { hex: string }>, res: Response) => {
 
 const refresh_token = (req: Request, res: Response) => {}
 
-export default { get_sign_message, refresh_token, login }
+export default { get_sign_message, refresh_token, login, get_nonce }

@@ -5,7 +5,7 @@ class User extends Model {
   @PrimaryKey @Column address: string
   @Column name: string
   @Default('normal') @Column role: string
-  @Default(0) @Column nonce: number
+  @Default(0) @Column nonce: string
   @Column signature: string
   @Column salt: string
 }

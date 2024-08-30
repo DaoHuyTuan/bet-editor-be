@@ -23,6 +23,7 @@
     "@wagmi/connectors": "^5.1.7",
     "@wagmi/core": "^2.13.4",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.2.1",
