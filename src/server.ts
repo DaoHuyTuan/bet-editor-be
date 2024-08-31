@@ -5,7 +5,7 @@ import { sequelize } from './db/database'
 const port = process.env.PORT || 4000
 
 ;(async () => {
-  await sequelize.sync({ force: true })
+  await sequelize.sync({ force: false })
 
   createServer(app).listen(port, () =>
     console.log(`Server listen on port ${port}`)

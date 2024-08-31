@@ -36,5 +36,5 @@ export const decryptAddress = async (data: string, salt: Buffer) => {
   console.log('decryptedAddress', decryptedAddress)
   decryptedAddress += decipher.final('utf8')
   console.log('decryptedAddress', getAddress(decryptedAddress))
-  return decryptedAddress
+  return decryptedAddress.toLowerCase()
 }

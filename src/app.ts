@@ -5,7 +5,9 @@ import cors from 'cors'
 import { postRouter } from './models/post/post-router'
 import { userRouter } from './models/user/user-router'
 import { authRouter } from './models/auth/auth-router'
+import dotenv from 'dotenv'
 
+dotenv.config()
 export const app = express()
 
 app.use(cors())

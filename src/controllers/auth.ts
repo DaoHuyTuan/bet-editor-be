@@ -4,6 +4,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import { decryptAddress, encryptAddress } from '../utils/secure'
 import { generateSiweNonce } from 'viem/siwe'
 import { User } from '../models/user/User'
+import { DEFAULT_NONCE, ERROR_CODE } from '../utils/variables'
 // import { User } from '../models/user/User'
 // import { Address, hashMessage, verifyHash } from 'viem'
 // import { signMessage, toAccount } from 'viem/accounts'
@@ -15,9 +16,12 @@ const get_nonce = async (req: Request, res: Response) => {
     if (user) {
       return res.status(200).send({ message: 'success', nonce: user.nonce })
     } else {
-      return res
-        .status(404)
-        .send({ message: 'User not found', error_code: 'USER_NOT_FOUND' })
+      console.log(DEFAULT_NONCE)
+      return res.status(400).send({
+        message: 'User not found',
+        error_code: ERROR_CODE.USER_NOT_FOUND,
+        nonce: DEFAULT_NONCE
+      })
     }
   } catch (error) {
     res.status(400).send({ message: 'Ops, something is wrong', error })
@@ -36,6 +40,24 @@ const get_sign_message = async (
 
     if (user) {
       salt = user.salt
+      const encryptedAddrees = await encryptAddress(req.body.address, salt)
+      const payloadJWT = {
+        s: salt, // salt
+        a: encryptedAddrees // address
+      }
+      const privateString = keccak256(
+        toHex(
+          `0x${salt}-${req.body.address.toLowerCase()}-${req.body.signature}`
+        )
+      )
+
+      const token = jwt.sign(payloadJWT, privateString, {
+        expiresIn: '1h'
+      })
+      return res.status(200).send({
+        message: 'success',
+        t: token // token
+      })
     } else {
       salt = generateSiweNonce()
       const encryptedAddrees = await encryptAddress(req.body.address, salt)
@@ -55,7 +77,7 @@ const get_sign_message = async (
       const newUser = await User.create({
         address,
         salt,
-        signature: privateString
+        signature: req.body.signature
       })
       if (newUser) {
         return res.status(200).send({
@@ -148,13 +170,30 @@ const login = async (req: Request<{}, {}, { hex: string }>, res: Response) => {
       (data as JwtPayload).s
     )
     console.log('address', address)
-    const hexValue = keccak256(
-      toHex(`0x${(data as JwtPayload).s}-${address.toLowerCase()}`)
-    )
-    console.log('hexValue', hexValue)
-    const result = await jwt.verify(token, hexValue)
-    console.log('result', result)
-    return res.status(200).send({ message: 'success', data: result })
+    const user = await User.findByPk(address)
+    if (user) {
+      const hexValue = keccak256(
+        toHex(`0x${(data as JwtPayload).s}-${address}-${user.signature}`)
+      )
+      console.log('hexValue', hexValue)
+      const result = await jwt.verify(token, hexValue)
+      console.log('result', result)
+      const userResponse = {
+        address: user.address,
+        role: user.role,
+        name: user.name
+      }
+      return res.status(200).send({
+        message: 'success',
+        jwt: {
+          ...(typeof result === 'object' ? result : {}),
+          t: token
+        },
+        message_code: 'LOGIN_SUCCESSFULL',
+        user: userResponse
+      })
+    }
+
     // const result = jwt.verify(token, privateString)
     // const { address, signature } = req.body
     // const recoveredAddress = await verifyHash({

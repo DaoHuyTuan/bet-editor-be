@@ -2,7 +2,11 @@ import { Request, Response } from 'express'
 
 import { User } from '../models/user/User'
 const get_users = (req: Request<{}, {}, User>, res: any, next: any) => {
-  User.findAll({})
+  User.findAll({
+    attributes: {
+      exclude: ['salt', 'signature', 'nonce']
+    }
+  })
     .then((users: User[]) => {
       if (users.length > 0) {
         res.status(200).json({ message: 'User found!', users })
