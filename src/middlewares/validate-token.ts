@@ -5,7 +5,9 @@ import { keccak256, toHex } from 'viem'
 import { decryptAddress } from '../utils/secure'
 
 interface AuthRequest extends Request {
-  user?: any // You can define a more specific type based on your User model
+  locals: {
+    address: string
+  }
 }
 
 export const validateToken = async (
@@ -58,7 +60,7 @@ export const validateToken = async (
     try {
       // @ts-ignore
       const result = await jwt.verify(token, hexValue)
-      req.user = user // Attach the user to the request object
+      req.locals.address = user.address
       next()
     } catch (verifyError) {
       console.error('Token verification failed:', verifyError)

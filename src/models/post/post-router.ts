@@ -2,8 +2,14 @@ import { Router } from 'express'
 import PostController from '../../controllers/post'
 import { validateToken } from '../../middlewares/validate-token'
 
-export const postRouter = () =>
-  Router()
-    .post('/posts', validateToken, PostController.get_posts)
+const router = Router()
 
-    .post('/posts/create', validateToken, PostController.create_post)
+export const postRouter = () =>
+  router.use(
+    '/v1/admin',
+    validateToken,
+    Router()
+      .post('/posts', PostController.get_posts)
+
+      .post('/posts/create', PostController.create_post)
+  )

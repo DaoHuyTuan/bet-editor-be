@@ -9,7 +9,7 @@ const get_posts = (
   const { page, limit, ...rest } = req.body
   Post.findAndCountAll({
     where: rest,
-    offset: (page - 1) * limit,
+    offset: page * limit,
     limit
   })
     .then(({ rows, count }: { rows: Post[]; count: number }) => {

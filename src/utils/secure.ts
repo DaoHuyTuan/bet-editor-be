@@ -18,7 +18,10 @@ export const encryptAddress = async (address: Address, salt: string) => {
   return iv.toString('hex') + ':' + encryptedAddress
 }
 
-export const decryptAddress = async (data: string, salt: Buffer) => {
+export const decryptAddress = async (
+  data: string,
+  salt: Buffer
+): Promise<Address> => {
   const [ivHex, encryptedAddress] = data.split(':')
   console.log('ivHex', ivHex)
   console.log('encryptedAddress', encryptedAddress)
@@ -36,5 +39,5 @@ export const decryptAddress = async (data: string, salt: Buffer) => {
   console.log('decryptedAddress', decryptedAddress)
   decryptedAddress += decipher.final('utf8')
   console.log('decryptedAddress', getAddress(decryptedAddress))
-  return decryptedAddress.toLowerCase()
+  return getAddress(decryptedAddress.toLowerCase())
 }
