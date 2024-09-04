@@ -11,12 +11,23 @@ export const app = express()
 app.use(cors())
 app.use(json())
 
-app.use(postRouter())
+// Create main API router
+const apiRouter = express.Router()
 
-app.use(userRouter())
+// Create admin router
+const adminRouter = express.Router()
 
-app.use(authRouter())
+// Mount public routes
+apiRouter.use('/posts', postRouter())
+apiRouter.use('/auth', authRouter())
 
+apiRouter.use('/users', userRouter().publicRoutes)
+
+// Admin user routes
+adminRouter.use('/users', userRouter().adminRoutes)
+
+app.use('/api/v1', apiRouter)
+app.use('/api/v1/admin', adminRouter)
 app.use(
   strongErrorHandler({
     debug: true

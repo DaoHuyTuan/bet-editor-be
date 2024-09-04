@@ -170,10 +170,10 @@ const login = async (req: Request<{}, {}, { hex: string }>, res: Response) => {
       (data as JwtPayload).s
     )
     console.log('address', address)
-    const user = await User.findByPk(address)
+    const user = await User.findByPk(address.toLowerCase())
     if (user) {
       const hexValue = keccak256(
-        toHex(`0x${(data as JwtPayload).s}-${address}-${user.signature}`)
+        toHex(`0x${(data as JwtPayload).s}-${user.address}-${user.signature}`)
       )
       console.log('hexValue', hexValue)
       const result = await jwt.verify(token, hexValue)

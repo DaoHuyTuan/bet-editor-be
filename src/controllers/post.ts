@@ -6,11 +6,13 @@ const get_posts = (
   res: any,
   next: any
 ) => {
-  const { page, limit, ...rest } = req.body
+  console.log('loole')
+  const { page, limit } = req.body
+
   Post.findAndCountAll({
-    where: rest,
-    offset: page * limit,
-    limit
+    // where: rest,
+    // offset: page * limit,
+    // limit
   })
     .then(({ rows, count }: { rows: Post[]; count: number }) => {
       if (rows.length > 0) {

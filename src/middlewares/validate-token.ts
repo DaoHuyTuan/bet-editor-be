@@ -35,7 +35,7 @@ export const validateToken = async (
     if (!decodedToken) {
       return res
         .status(401)
-        .json({ message: 'Invalid token', message_code: 'INVALID_TOKEN' })
+        .json({ message: 'Invalid token', message_code: 'INVALID_TOKEN_1' })
     }
 
     const { a, s } = decodedToken
@@ -47,20 +47,23 @@ export const validateToken = async (
     }
 
     const address = await decryptAddress(a, s)
-    const user = await User.findByPk(address)
+    const user = await User.findByPk(address.toLowerCase())
 
     if (!user) {
       return res
         .status(404)
         .json({ message: 'User not found', message_code: 'USER_NOT_FOUND' })
     }
-
-    const hexValue = keccak256(toHex(`0x${s}-${address}-${user.signature}`))
+    console.log('user_val', user)
+    console.log('address_val', user.address)
+    const hexValue = keccak256(
+      toHex(`0x${s}-${user.address}-${user.signature}`)
+    )
 
     try {
       // @ts-ignore
       const result = await jwt.verify(token, hexValue)
-      req.locals.address = user.address
+      // req.locals.address = user.address
       next()
     } catch (verifyError) {
       console.error('Token verification failed:', verifyError)
