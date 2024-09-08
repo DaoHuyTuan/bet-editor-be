@@ -33,9 +33,13 @@ const create_post = async (
 ) => {
   try {
     const { path } = req.body
+    const { address } = res.locals as { address: string }
+    console.log('path', path)
+
+    console.log('res', res)
     const [post, created] = await Post.findOrCreate({
       where: { path },
-      defaults: { ...req.body, address: req.body.owner.toLowerCase() }
+      defaults: { ...req.body, owner: address }
     })
     console.log('post', post)
     console.log('created', created)

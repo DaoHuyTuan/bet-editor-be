@@ -72,7 +72,7 @@ const get_sign_message = async (
       )
 
       const token = jwt.sign(payloadJWT, privateString, {
-        expiresIn: '1h'
+        expiresIn: '30 days'
       })
       const newUser = await User.create({
         address,

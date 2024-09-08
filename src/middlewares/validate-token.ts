@@ -63,7 +63,8 @@ export const validateToken = async (
     try {
       // @ts-ignore
       const result = await jwt.verify(token, hexValue)
-      // req.locals.address = user.address
+      res.locals.address = user.address
+      console.log('res', res.locals)
       next()
     } catch (verifyError) {
       console.error('Token verification failed:', verifyError)
