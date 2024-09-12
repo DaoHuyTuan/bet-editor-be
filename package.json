@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.649.0",
+    "@aws-sdk/s3-request-presigner": "^3.650.0",
     "@wagmi/connectors": "^5.1.7",
     "@wagmi/core": "^2.13.4",
     "body-parser": "^1.20.2",
