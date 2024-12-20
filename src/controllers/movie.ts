@@ -1,20 +1,20 @@
 import { Request, Response } from 'express'
 
-import { Post } from '../models/post/Post'
-const get_posts = (
-  req: Request<{}, {}, { limit: number; page: number } & Post>,
+import { Movie } from '../models/movie/Movie'
+const get_movies = (
+  req: Request<{}, {}, { limit: number; page: number } & Movie>,
   res: any,
   next: any
 ) => {
   console.log('loole')
   const { page, limit } = req.body
 
-  Post.findAndCountAll({
+  Movie.findAndCountAll({
     // where: rest,
     // offset: page * limit,
     // limit
   })
-    .then(({ rows, count }: { rows: Post[]; count: number }) => {
+    .then(({ rows, count }: { rows: Movie[]; count: number }) => {
       if (rows.length > 0) {
         res
           .status(200)
@@ -26,8 +26,8 @@ const get_posts = (
     .catch((err: any) => console.log(err))
 }
 
-const create_post = async (
-  req: Request<{}, {}, Post>,
+const create_movie = async (
+  req: Request<{}, {}, Movie>,
   res: Response<{}, {}>,
   next: any
 ) => {
@@ -37,7 +37,7 @@ const create_post = async (
     console.log('path', path)
 
     console.log('res', res)
-    const [post, created] = await Post.findOrCreate({
+    const [post, created] = await Movie.findOrCreate({
       where: { path },
       defaults: { ...req.body, owner: address }
     })
@@ -66,8 +66,8 @@ const delete_post = (req: any, res: any, next: any) => {}
 const update_post = (req: any, res: any, next: any) => {}
 
 export default {
-  get_posts,
-  create_post,
+  get_movies,
+  create_movie,
   publish_post,
   delete_post,
   update_post
