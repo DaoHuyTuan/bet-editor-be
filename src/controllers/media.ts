@@ -3,6 +3,8 @@ import { generateSiweNonce } from 'viem/siwe'
 import { s3Client } from '../S3'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { Media } from '../models/media/Media'
+
 const upload = async (req: Request, res: Response, next: any) => {
   try {
     const { name } = req.body
@@ -24,6 +26,23 @@ const upload = async (req: Request, res: Response, next: any) => {
   }
 }
 
+const create = async (req: Request, res: Response, next: any) => {
+  try {
+    const { name, key, url } = req.body
+    const timestamp = new Date().getTime()
+    const urlAssets = `${timestamp}-${key}-${name}`
+    Media.create({
+      key,
+      url: urlAssets,
+      type: 'content'
+      // owner: req.user.id
+    }).then(media => {})
+  } catch (error) {
+    return res.status(400).json({ message: 'Something is wrong!', error })
+  }
+}
+
 export default {
-  upload
+  upload,
+  create
 }
