@@ -10,9 +10,7 @@ const get_movies = (
   const { page, limit } = req.body
 
   Movie.findAndCountAll({
-    // where: rest,
-    // offset: page * limit,
-    // limit
+    where: {}
   })
     .then(({ rows, count }: { rows: Movie[]; count: number }) => {
       if (rows.length > 0) {

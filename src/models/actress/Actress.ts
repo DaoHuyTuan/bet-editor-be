@@ -1,4 +1,5 @@
 import { Model, Table, Column, PrimaryKey } from 'sequelize-typescript'
+
 // import { ICategory } from '../category/Category'
 
 @Table
