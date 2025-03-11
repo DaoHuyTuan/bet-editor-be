@@ -32,9 +32,6 @@ const create_movie = async (
   try {
     const { path } = req.body
     const { address } = res.locals as { address: string }
-    console.log('path', path)
-
-    console.log('res', res)
     const [post, created] = await Movie.findOrCreate({
       where: { path },
       defaults: { ...req.body, owner: address }

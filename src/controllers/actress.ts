@@ -55,31 +55,38 @@ const get_actress = async (
   }
 }
 const create_actress = async (
-  req: Request<{}, {}, Actress>,
+  req: Request<{}, {}, Omit<Actress, 'id'>>,
   res: Response,
   next: any
 ) => {
-  const { id, name, image } = req.body
-  sequelize.transaction(t => {
-    return Actress.findOrCreate({
-      where: {
-        id: id,
-        name: name
-      },
-      defaults: {
-        id,
-        name,
-        image
-      },
-      transaction: t
-    }).then(([result, created]) => {
-      if (created) {
-        res.status(200).json({ message: 'Actress created successfull', result })
-      } else {
-        res.status(400).json({ message: 'Actress existed!', actress: result })
-      }
+  try {
+    const { value, name, image } = req.body
+    sequelize.transaction(t => {
+      return Actress.findOrCreate({
+        where: {
+          value: value
+        },
+        defaults: {
+          value,
+          name,
+          image
+        },
+        transaction: t
+      }).then(([result, created]) => {
+        if (created) {
+          res
+            .status(200)
+            .json({ message: 'Actress created successfull', result })
+        } else {
+          res.status(400).json({ message: 'Actress existed!', actress: result })
+        }
+      })
     })
-  })
+  } catch (error) {
+    console.error('Error in create_actress:', error)
+    res.status(500).json({ message: 'Server error', error })
+    next(error) // Chuyển lỗi tới middleware xử lý lỗi chung (nếu có)
+  }
 }
 export default {
   get_actress,

@@ -12,6 +12,8 @@ import { Actress } from '../actress/Actress'
 import { Tag } from '../tag/Tag'
 import { MovieActress } from '../movie-actress/MovieActress'
 import { MovieTag } from '../movie-tag/MovieTag'
+import { Category } from '../category/Category'
+import { MovieCategory } from '../movie-category/MovieCategory'
 // import { MovieTag } from '../movie-tag/MovieTag'
 
 export interface PostMetadata {
@@ -64,7 +66,7 @@ class Movie extends Model {
   @BelongsToMany(() => Tag, () => MovieTag)
   tags: Tag[]
 
-  // @BelongsToMany(() => Category, () => MovieCategory)
-  // categories: Category[]
+  @BelongsToMany(() => Category, () => MovieCategory)
+  categories: Category[]
 }
 export { Movie }
