@@ -4,7 +4,6 @@ import {
   Table,
   Column,
   PrimaryKey,
-  Default,
   BelongsToMany,
   BeforeValidate
 } from 'sequelize-typescript'
@@ -15,27 +14,18 @@ import { Movie } from '../movie/Movie'
 
 @Table
 class Actress extends Model {
-  @PrimaryKey @Default(DataTypes.UUIDV4) @Column id: string
+  @PrimaryKey
   @Column({
-    allowNull: false,
-    validate: {
-      notEmpty: {
-        msg: "Field 'name' is require"
-      },
-      notNull: {
-        msg: 'Name is require'
-      }
-    }
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4
+  })
+  id: string
+  @Column({
+    allowNull: true
   })
   name: string
   @Column({
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'Field "value" is require' },
-      notNull: {
-        msg: 'Value is require'
-      }
-    }
+    allowNull: true
   })
   value: string
   @Column({ allowNull: true }) image: string

@@ -22,9 +22,9 @@ export class Tag extends Model {
 
   @Column({
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   })
-  label: string
+  name: string
 
   @Column({
     type: DataTypes.STRING,
