@@ -9,6 +9,7 @@ import { Tag } from '../models/tag/Tag'
 import { CreateMovieParam } from '../validate'
 import { sequelize } from '../db/database'
 import { formatValue } from '../utils/utils'
+import { buildInclude, buildQueryWhere } from '../utils/query'
 
 const get_movies = async (
   req: Request<{}, {}, { limit: number; page: number } & Movie>,
@@ -21,14 +22,16 @@ const get_movies = async (
       tag,
       actress,
       category,
-      limit = '10',
-      page = '1'
-    } = req.query
-
-    // Chuyển đổi limit và page thành số, mặc định limit=10, page=1
-    const limitNum = parseInt(limit as string, 10) || 10
-    const pageNum = parseInt(page as string, 10) || 1
-    const offset = (pageNum - 1) * limitNum // Tính offset để skip các bản ghi
+      limit = 10,
+      page = 1
+    } = req.query as {
+      query: string | undefined
+      tag: string | undefined
+      actress: string | undefined
+      category: string | undefined
+      limit: string | undefined
+      page: string | undefined
+    }
 
     console.log('Request query:', {
       query,
@@ -37,91 +40,22 @@ const get_movies = async (
       category,
       limit,
       page
-    }) // Log để kiểm tra
+    })
 
-    const where: any = {}
-    const include: any[] = [
-      {
-        model: Tag,
-        as: 'tags',
-        required: false,
-        attributes: ['value', 'name'],
-        through: { attributes: [] }
-      },
-      {
-        model: Actress,
-        as: 'actresses',
-        required: false,
-        attributes: ['value', 'name'],
-        through: { attributes: [] }
-      },
-      {
-        model: Category,
-        as: 'categories',
-        required: false,
-        attributes: ['value', 'name'],
-        through: { attributes: [] }
-      }
-    ]
+    const limitNum = parseInt(limit as string, 10) || 10
+    const pageNum = parseInt(page as string, 10) || 1
+    const offset = (pageNum - 1) * limitNum
 
-    // Thanh input search (query)
-    if (query) {
-      console.log('Applying query filter:', query) // Log nhánh if
-      where[Op.or] = [
-        { title: { [Op.iLike]: `%${query}%` } },
-        { '$tags.name$': { [Op.iLike]: `%${query}%` } },
-        { '$tags.value$': { [Op.iLike]: `%${query}%` } },
-        { '$actresses.name$': { [Op.iLike]: `%${query}%` } },
-        { '$actresses.value$': { [Op.iLike]: `%${query}%` } },
-        { '$categories.name$': { [Op.iLike]: `%${query}%` } },
-        { '$categories.value$': { [Op.iLike]: `%${query}%` } }
-      ]
-    }
+    const where = buildQueryWhere(query)
+    const include = buildInclude(query, tag, actress, category)
 
-    // Lọc theo tag cụ thể
-    if (tag) {
-      include.push({
-        model: Tag,
-        as: 'tags',
-        where: { value: tag },
-        required: true,
-        attributes: ['value', 'name'],
-        through: { attributes: [] }
-      })
-    }
-
-    // Lọc theo actress cụ thể
-    if (actress) {
-      include.push({
-        model: Actress,
-        as: 'actresses',
-        where: { value: actress },
-        required: true,
-        attributes: ['value', 'name'],
-        through: { attributes: [] }
-      })
-    }
-
-    // Lọc theo category cụ thể
-    if (category) {
-      include.push({
-        model: Category,
-        as: 'categories',
-        where: { value: category },
-        required: true,
-        attributes: ['value', 'name'],
-        through: { attributes: [] }
-      })
-    }
-
-    // Dùng findAndCountAll để lấy cả số lượng tổng và dữ liệu phân trang
     const { count, rows: movies } = await Movie.findAndCountAll({
       where,
       include,
-      attributes: ['id', 'title', 'path'], // Chỉ lấy các trường cần thiết của Movie
+      attributes: ['id', 'title', 'path'],
       limit: limitNum,
       offset,
-      ...(true && { distinct: true }) // Ép kiểu để tránh lỗi TypeScript
+      ...(true && { distinct: true })
     } as any)
 
     if (!movies.length) {
@@ -140,17 +74,12 @@ const get_movies = async (
       return res.status(404).json({ message: 'No movies found' })
     }
 
-    // Tính tổng số trang
     const totalPages = Math.ceil(count / limitNum)
 
     return res.status(200).json({
       message: 'Movies found',
       movies,
-      pagination: {
-        limit: limitNum,
-        currentPage: pageNum,
-        totalPages
-      }
+      pagination: { limit: limitNum, currentPage: pageNum, totalPages }
     })
   } catch (error) {
     console.error('Error in get_movies:', error)
@@ -166,13 +95,20 @@ const create_movie = async (
   next: NextFunction
 ) => {
   try {
-    const { title, path, tags = [], actresses = [], categories = [] } = req.body
-
+    const {
+      title,
+      path,
+      tags = [],
+      actresses = [],
+      categories = [],
+      isNew
+    } = req.body
+    const isNewValue = isNew !== undefined ? isNew : null
     const [movie, created] = await sequelize.transaction(
       async (t): Promise<[Movie, boolean]> => {
         const [movieInstance, movieCreated] = await Movie.findOrCreate({
           where: { path },
-          defaults: { title, path },
+          defaults: { title, path, isNew: isNewValue },
           transaction: t
         })
 
@@ -289,16 +225,39 @@ const create_movie = async (
   }
 }
 
-const publish_post = (req: any, res: any, next: any) => {}
+const get_new_movie = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Truy vấn database để lấy 10 video có isNew = false hoặc không phải true
+    const movies = await Movie.findAll({
+      where: { isNew: true }, // Chỉ lấy các video có isNew = false
+      limit: 10, // Giới hạn 10 video
+      attributes: ['id', 'title', 'path'] // Chỉ lấy các trường cần thiết
+    })
 
-const delete_post = (req: any, res: any, next: any) => {}
+    // Nếu không tìm thấy video nào
+    if (!movies.length) {
+      return res
+        .status(404)
+        .json({ message: 'Không tìm thấy video nào không phải mới' })
+    }
 
-const update_post = (req: any, res: any, next: any) => {}
+    // Trả về danh sách video với thông báo thành công
+    return res
+      .status(200)
+      .json({ message: 'Đã lấy được danh sách video không phải mới', movies })
+  } catch (error) {
+    // Ghi log lỗi để debug
+    console.error('Lỗi trong getNonNewMovies:', error)
+    return res.status(500).json({ message: 'Lỗi server', error: error.message })
+  }
+}
 
 export default {
   get_movies,
   create_movie,
-  publish_post,
-  delete_post,
-  update_post
+  get_new_movie
 }

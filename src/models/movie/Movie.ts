@@ -60,6 +60,12 @@ class Movie extends Model {
   })
   place_holder: string
 
+  @Column({
+    type: DataTypes.BOOLEAN,
+    field: 'isNew'
+  })
+  isNew: boolean
+
   @BelongsToMany(() => Actress, () => MovieActress)
   actresses: Actress[]
 

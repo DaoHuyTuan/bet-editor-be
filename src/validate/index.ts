@@ -6,6 +6,7 @@ import { z } from 'zod'
 export const CreateMovieSchema = z
   .object({
     id: z.string().uuid(),
+    isNew: z.boolean().optional().default(false),
     title: z
       .string({ required_error: 'Field "title" is required' })
       .min(1, { message: 'Field "title" cannot be empty' }),

@@ -12,3 +12,4 @@ export const movieRouter = () =>
       MovieController.create_movie
     )
     .post('/getMovie', MovieController.get_movies)
+    .get('/getNewMovie', MovieController.get_new_movie)
